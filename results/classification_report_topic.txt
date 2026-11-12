@@ -1,0 +1,11 @@
+Bài toán: topic | TF-IDF + Linear SVM
+                      precision    recall  f1-score   support
+
+          Giảng viên     0.9338    0.9061    0.9198      2290
+Chương trình đào tạo     0.6677    0.7517    0.7072       572
+      Cơ sở vật chất     0.8940    0.9310    0.9122       145
+                Khác     0.4899    0.4591    0.4740       159
+
+            accuracy                         0.8569      3166
+           macro avg     0.7464    0.7620    0.7533      3166
+        weighted avg     0.8616    0.8569    0.8586      3166

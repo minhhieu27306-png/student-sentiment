@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Kết quả trên tập kiểm thử cho bài toán cảm xúc (\%). In đậm: giá trị cao nhất mỗi cột. P/R/F1-macro: trung bình không trọng số các lớp; F1-w: trung bình có trọng số.}
+\label{tab:results-sentiment}
+\fitbox{\begin{tabular}{llrrrrr}
+\toprule
+Đặc trưng & Mô hình & Acc & P-macro & R-macro & F1-macro & F1-w \\
+\midrule
+BoW & Naive Bayes & 85.98 & 67.42 & 65.90 & 66.37 & 85.48 \\
+ & Logistic Regression & 87.84 & 73.82 & \textbf{76.91} & 75.06 & 88.24 \\
+ & Linear SVM & 89.01 & 75.32 & 76.16 & \textbf{75.71} & \textbf{89.10} \\
+ & Random Forest & 87.24 & 72.91 & 70.71 & 71.57 & 86.92 \\
+ & KNN & 83.26 & 68.92 & 65.71 & 66.87 & 82.73 \\
+\midrule
+TF-IDF & Naive Bayes & 87.40 & \textbf{76.95} & 64.50 & 65.22 & 85.82 \\
+ & Logistic Regression & 88.25 & 72.62 & 73.36 & 72.93 & 88.38 \\
+ & Linear SVM & \textbf{89.39} & 75.65 & 72.21 & 73.47 & 88.95 \\
+ & Random Forest & 87.43 & 75.58 & 68.54 & 70.38 & 86.63 \\
+ & KNN & 82.82 & 65.97 & 63.43 & 64.26 & 82.15 \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "1. Tải dữ liệu", "type": "debugpy", "request": "launch", "module": "src.data_loader", "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "2. Tiền xử lý", "type": "debugpy", "request": "launch", "module": "src.preprocess", "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "3. EDA", "type": "debugpy", "request": "launch", "module": "src.eda", "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "4. Huấn luyện (nhanh, không embedding)", "type": "debugpy", "request": "launch", "module": "src.train", "args": ["--skip-embedding"], "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "4. Huấn luyện (đầy đủ + ablation)", "type": "debugpy", "request": "launch", "module": "src.train", "args": ["--ablation"], "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "5. Đánh giá", "type": "debugpy", "request": "launch", "module": "src.evaluate", "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "6. Sinh bảng LaTeX", "type": "debugpy", "request": "launch", "module": "src.make_latex", "console": "integratedTerminal", "cwd": "${workspaceFolder}" },
+    { "name": "Streamlit app", "type": "debugpy", "request": "launch", "module": "streamlit", "args": ["run", "app.py"], "console": "integratedTerminal", "cwd": "${workspaceFolder}" }
+  ]
+}

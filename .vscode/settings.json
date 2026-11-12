@@ -1,0 +1,18 @@
+{
+  "python.terminal.activateEnvironment": true,
+  "files.encoding": "utf8",
+  "notebook.output.textLineLimit": 60,
+
+  // LaTeX Workshop: biên dịch báo cáo bằng XeLaTeX (hỗ trợ tiếng Việt)
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk-xelatex",
+      "command": "latexmk",
+      "args": ["-xelatex", "-synctex=1", "-interaction=nonstopmode", "-file-line-error", "%DOC%"]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    { "name": "latexmk (XeLaTeX)", "tools": ["latexmk-xelatex"] }
+  ],
+  "latex-workshop.latex.recipe.default": "first"
+}

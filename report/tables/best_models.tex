@@ -1,0 +1,13 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Mô hình tốt nhất cho mỗi bài toán (chọn theo F1-macro trên tập kiểm định; số liệu test (\%) chỉ để báo cáo).}
+\label{tab:best}
+\fitbox{\begin{tabular}{lllcrrr}
+\toprule
+Bài toán & Đặc trưng & Mô hình & Siêu tham số & F1-macro (val) & Acc (test) & F1-macro (test) \\
+\midrule
+Cảm xúc & BoW & Linear SVM & C=0.1 & 78.50 & 89.01 & 75.71 \\
+Chủ đề & TF-IDF & Linear SVM & C=0.5 & 75.77 & 85.69 & 75.33 \\
+\bottomrule
+\end{tabular}}
+\end{table}

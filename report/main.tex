@@ -1,0 +1,264 @@
+% !TEX program = xelatex
+% ============================================================================
+% Báo cáo đồ án: Phân loại cảm xúc & chủ đề phản hồi sinh viên (UIT-VSFC)
+% Biên dịch bằng XeLaTeX:   latexmk -xelatex main.tex     (hoặc xelatex main.tex, chạy 2 lần)
+% Các bảng/macro số liệu nằm trong tables/ và được SINH TỰ ĐỘNG bởi:  python -m src.make_latex
+% Các chỗ cần bạn tự viết/điền được đánh dấu bằng \todo{...} (chữ đỏ).
+% ============================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{fontspec}
+% Ưu tiên Times New Roman; nếu máy không có thì dùng TeX Gyre Termes, cuối cùng là Latin Modern (đều hỗ trợ tiếng Việt).
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{%
+  \IfFontExistsTF{TeX Gyre Termes}{\setmainfont{TeX Gyre Termes}}{\setmainfont{Latin Modern Roman}}}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\setstretch{1.15}
+\setlist{itemsep=2pt,topsep=4pt}
+\captionsetup{font=small,labelfont=bf}
+
+% --- Tên tiếng Việt cho các thành phần tự sinh ---
+\renewcommand{\figurename}{Hình}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\abstractname}{Tóm tắt}
+\renewcommand{\refname}{Tài liệu tham khảo}
+
+% --- Ghi chú cần điền (hiện màu đỏ) ---
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[#1]}}}
+% Co bảng nếu rộng hơn khổ giấy (không phóng to bảng nhỏ)
+\newcommand{\fitbox}[1]{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}
+
+% --- Nạp số liệu sinh tự động; nếu chưa có thì hiện ?? thay vì báo lỗi ---
+\IfFileExists{tables/macros.tex}{\input{tables/macros.tex}}{}
+\newcommand{\unk}{\textcolor{red}{\textbf{??}}}
+\providecommand{\NTrain}{\unk}\providecommand{\NVal}{\unk}\providecommand{\NTest}{\unk}\providecommand{\NTotal}{\unk}
+\providecommand{\MeanLen}{\unk}\providecommand{\MaxLen}{\unk}\providecommand{\ImbSent}{\unk}\providecommand{\ImbTopic}{\unk}
+\providecommand{\DupTrain}{\unk}\providecommand{\OverlapTest}{\unk}
+\providecommand{\BestSentFeature}{\unk}\providecommand{\BestSentModel}{\unk}\providecommand{\BestSentAcc}{\unk}
+\providecommand{\BestSentFOne}{\unk}\providecommand{\BestSentFW}{\unk}
+\providecommand{\BestTopicFeature}{\unk}\providecommand{\BestTopicModel}{\unk}\providecommand{\BestTopicAcc}{\unk}
+\providecommand{\BestTopicFOne}{\unk}\providecommand{\BestTopicFW}{\unk}
+
+% --- Chèn bảng/hình nếu tồn tại ---
+\newcommand{\safeinput}[1]{%
+  \IfFileExists{tables/#1.tex}{\input{tables/#1.tex}}{%
+    \par\noindent\fbox{\parbox{0.94\linewidth}{\textcolor{red}{\textbf{[Chưa có \texttt{\detokenize{tables/#1.tex}}]}} Hãy chạy \texttt{python -m src.make\_latex}.}}\par}}
+% \safefigure{tệp}{nhãn}{chú thích}{độ rộng (tỉ lệ \linewidth)}
+\newcommand{\safefigure}[4]{%
+  \begin{figure}[htbp]\centering
+  \IfFileExists{figures/#1}{\includegraphics[width=#4\linewidth]{figures/#1}}{%
+    \fbox{\parbox{0.8\linewidth}{\centering\textcolor{red}{\textbf{[Chưa có \texttt{\detokenize{figures/#1}}]}}}}}
+  \caption{#3}\label{#2}\end{figure}}
+
+\title{\textbf{Phân loại cảm xúc và chủ đề phản hồi của sinh viên\\trên bộ dữ liệu UIT-VSFC}}
+\author{\todo{Họ và tên} \\ \todo{MSSV} \\ \todo{Lớp / Khoa / Trường} \\[4pt] Giảng viên hướng dẫn: \todo{Tên giảng viên}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Báo cáo trình bày hệ thống tự động phân loại ý kiến phản hồi bằng tiếng Việt của sinh viên theo hai bài toán:
+\emph{cảm xúc} (tiêu cực, trung tính, tích cực) và \emph{chủ đề} (giảng viên, chương trình đào tạo, cơ sở vật chất, khác),
+trên bộ dữ liệu UIT-VSFC gồm \NTotal{} câu. Chúng tôi so sánh ba cách biểu diễn văn bản (Bag-of-Words, TF-IDF và Sentence Embeddings)
+kết hợp với năm thuật toán (Naive Bayes, Logistic Regression, Linear SVM, Random Forest, KNN), với siêu tham số và mô hình được chọn trên tập kiểm định.
+Với bài toán cảm xúc, cấu hình được chọn là \BestSentFeature{} + \BestSentModel{}, đạt Accuracy \BestSentAcc\% và F1-macro \BestSentFOne\% trên tập kiểm thử;
+với bài toán chủ đề là \BestTopicFeature{} + \BestTopicModel{}, đạt Accuracy \BestTopicAcc\% và F1-macro \BestTopicFOne\%.
+Mô hình được triển khai thành ứng dụng web Streamlit cho phép nhập một câu và nhận dự đoán tức thời.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Giới thiệu}
+Phản hồi của sinh viên về giảng viên, chương trình đào tạo và cơ sở vật chất là nguồn thông tin quan trọng để nhà trường cải thiện chất lượng đào tạo.
+Khi số lượng phản hồi lớn, việc đọc và tổng hợp thủ công tốn nhiều thời gian; do đó cần một hệ thống tự động phân loại ý kiến theo
+\emph{cảm xúc} và \emph{chủ đề}.
+
+Mục tiêu của đề tài:
+\begin{itemize}
+  \item Xây dựng quy trình tiền xử lý văn bản tiếng Việt (chuẩn hóa, xử lý teencode, tách từ).
+  \item So sánh có hệ thống các phương pháp biểu diễn văn bản và thuật toán học máy cổ điển cho hai bài toán phân loại.
+  \item Đánh giá bằng Accuracy, Precision, Recall, F1 (macro và weighted) và ma trận nhầm lẫn; phân tích lỗi.
+  \item Đóng gói mô hình thành ứng dụng demo và mã nguồn có thể tái lập.
+\end{itemize}
+
+% ============================================================================
+\section{Bộ dữ liệu và khám phá dữ liệu}
+\subsection{Bộ dữ liệu UIT-VSFC}
+UIT-VSFC (Vietnamese Students' Feedback Corpus) do nhóm UIT-NLP công bố \cite{nguyen2018uitvsfc}, được truy cập trong đề tài qua Hugging Face Hub
+(\texttt{uitnlp/vietnamese\_students\_feedback}). Mỗi mẫu là một câu phản hồi kèm hai nhãn:
+\begin{itemize}
+  \item \texttt{sentiment}: 0 -- Tiêu cực (negative), 1 -- Trung tính (neutral), 2 -- Tích cực (positive);
+  \item \texttt{topic}: 0 -- Giảng viên (lecturer), 1 -- Chương trình đào tạo (training program), 2 -- Cơ sở vật chất (facility), 3 -- Khác (others).
+\end{itemize}
+Dữ liệu được chia sẵn thành tập huấn luyện (\NTrain{} câu), kiểm định (\NVal{} câu) và kiểm thử (\NTest{} câu).
+Bảng~\ref{tab:dataset} thống kê số mẫu và phân bố các lớp.
+
+\safeinput{dataset_stats}
+
+\subsection{Phân bố lớp và độ dài câu}
+Trên tập huấn luyện, tỉ lệ giữa lớp lớn nhất và lớp nhỏ nhất là \ImbSent{} đối với cảm xúc và \ImbTopic{} đối với chủ đề (Hình~\ref{fig:dist-sent}, \ref{fig:dist-topic}).
+Độ dài trung bình của một câu là \MeanLen{} từ (tối đa \MaxLen{} từ) (Hình~\ref{fig:len}).
+Trong tập huấn luyện có \DupTrain{} câu trùng lặp, và \OverlapTest{} câu của tập kiểm thử cũng xuất hiện trong tập huấn luyện;
+đây là yếu tố có thể làm kết quả kiểm thử cao hơn so với dữ liệu hoàn toàn mới.
+
+\safefigure{class_distribution_sentiment.png}{fig:dist-sent}{Phân bố các lớp cảm xúc theo từng tập dữ liệu.}{0.95}
+\safefigure{class_distribution_topic.png}{fig:dist-topic}{Phân bố các lớp chủ đề theo từng tập dữ liệu.}{0.95}
+\safefigure{length_distribution.png}{fig:len}{Phân bố độ dài câu (số từ) và độ dài theo cảm xúc.}{0.95}
+\safefigure{sentiment_by_topic.png}{fig:sent-topic}{Quan hệ giữa chủ đề và cảm xúc trên tập huấn luyện.}{0.7}
+
+\todo{Viết nhận xét của bạn về Hình~\ref{fig:dist-sent}--\ref{fig:sent-topic}: lớp nào chiếm đa số/thiểu số, hệ quả đối với việc chọn chỉ số đánh giá (F1-macro) và cách xử lý mất cân bằng.}
+
+% ============================================================================
+\section{Phương pháp}
+\subsection{Tiền xử lý văn bản}
+Mỗi câu được xử lý theo thứ tự sau (mã nguồn \texttt{src/preprocess.py}):
+\begin{enumerate}
+  \item Chuẩn hóa Unicode về dạng NFC, giải mã HTML entity, xóa đường dẫn URL;
+  \item Chuyển về chữ thường;
+  \item Xóa chữ số, dấu câu và ký tự đặc biệt; rút gọn các ký tự kéo dài (ví dụ ``quáaaa'' thành ``quá'');
+  \item Chuẩn hóa teencode và từ viết tắt theo từ điển (ví dụ ``ko'' $\rightarrow$ ``không'', ``đc'' $\rightarrow$ ``được'');
+  \item Gộp khoảng trắng thừa;
+  \item Tách từ bằng thư viện \texttt{pyvi} \cite{pyvi}: các âm tiết thuộc cùng một từ được nối bằng dấu gạch dưới (``giảng viên'' $\rightarrow$ ``giảng\_viên'').
+\end{enumerate}
+Quy trình cho ra hai phiên bản văn bản: \emph{đã tách từ} (dùng cho BoW và TF-IDF) và \emph{chưa tách từ} (dùng cho Sentence Embeddings, vì mô hình đa ngôn ngữ nhận văn bản thô).
+
+\subsection{Trích xuất đặc trưng}
+\paragraph{Bag-of-Words (BoW).} Mỗi câu được biểu diễn bằng vector đếm số lần xuất hiện của các unigram và bigram (\texttt{ngram\_range=(1,2)}, \texttt{min\_df=2}).
+
+\paragraph{TF-IDF.} Với cùng tập n-gram $(1,2)$, trọng số của từ $t$ trong câu $d$ là
+\begin{equation}
+  \mathrm{tfidf}(t,d) = \bigl(1+\log \mathrm{tf}(t,d)\bigr)\cdot \Bigl(\log\frac{1+N}{1+\mathrm{df}(t)} + 1\Bigr),
+\end{equation}
+sau đó vector được chuẩn hóa L2 (\texttt{sublinear\_tf=True}) \cite{manning2008ir}. Từ vựng chỉ được học trên tập huấn luyện để tránh rò rỉ dữ liệu.
+
+\paragraph{Sentence Embeddings.} Mỗi câu được ánh xạ thành một vector dày bằng mô hình \texttt{paraphrase-\allowbreak multilingual-\allowbreak MiniLM-\allowbreak L12-\allowbreak v2} (384 chiều) của thư viện \texttt{sentence-transformers} \cite{reimers2019sbert,reimers2020multilingual};
+vector được chuẩn hóa L2 và lưu đệm vào đĩa để không phải tính lại.
+
+\subsection{Thuật toán phân loại}
+Năm thuật toán được khảo sát (cài đặt bằng scikit-learn \cite{pedregosa2011sklearn}):
+Naive Bayes (Multinomial cho BoW/TF-IDF, Gaussian cho embedding vì có giá trị âm);
+Logistic Regression;
+Linear SVM \cite{cortes1995svm,fan2008liblinear};
+Random Forest \cite{breiman2001rf} (200 cây);
+và KNN (khoảng cách cosine, trọng số theo khoảng cách).
+Với Logistic Regression, Linear SVM và Random Forest, trọng số lớp được đặt là \texttt{balanced} để giảm ảnh hưởng của mất cân bằng lớp.
+
+\subsection{Giao thức thực nghiệm}
+Để tránh rò rỉ dữ liệu kiểm thử, chúng tôi áp dụng quy trình:
+(i) bộ vector hóa chỉ được fit trên tập huấn luyện;
+(ii) siêu tham số của từng mô hình được chọn bằng F1-macro trên tập \emph{kiểm định} (Bảng~\ref{tab:grid});
+(iii) mô hình tốt nhất cho mỗi bài toán cũng được chọn bằng F1-macro trên tập kiểm định;
+(iv) tập kiểm thử chỉ dùng để báo cáo kết quả cuối cùng. Hạt giống ngẫu nhiên cố định là 42.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Lưới siêu tham số được khảo sát cho từng thuật toán.}\label{tab:grid}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\toprule
+Thuật toán & Siêu tham số \\
+\midrule
+Naive Bayes & $\alpha\in\{0.1,0.3,1\}$ (Multinomial); \texttt{var\_smoothing}$\in\{10^{-9},10^{-7},10^{-5}\}$ (Gaussian) \\
+Logistic Regression & $C\in\{0.5,1,5,20\}$ \\
+Linear SVM & $C\in\{0.05,0.1,0.5,1\}$ \\
+Random Forest & 200 cây; \texttt{min\_samples\_leaf}$\in\{1,2\}$ \\
+KNN & $k\in\{5,11,21\}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Chỉ số đánh giá}
+Với mỗi lớp $c$, Precision $P_c$, Recall $R_c$ và $F1_c = \dfrac{2P_cR_c}{P_c+R_c}$.
+F1-macro là trung bình không trọng số $\frac{1}{K}\sum_c F1_c$, coi mọi lớp quan trọng như nhau nên nhạy với lớp thiểu số;
+F1-weighted là trung bình có trọng số theo số mẫu của từng lớp. Ngoài ra báo cáo Accuracy và ma trận nhầm lẫn.
+
+% ============================================================================
+\section{Kết quả thực nghiệm}
+\subsection{So sánh các mô hình}
+Bảng~\ref{tab:results-sentiment} và \ref{tab:results-topic} trình bày kết quả của toàn bộ $3\times5$ cấu hình trên tập kiểm thử;
+Hình~\ref{fig:cmp} tóm tắt F1-macro. Bảng~\ref{tab:best} liệt kê mô hình được chọn cho từng bài toán.
+
+\safeinput{results_sentiment}
+\safeinput{results_topic}
+\safefigure{model_comparison.png}{fig:cmp}{F1-macro trên tập kiểm thử của các tổ hợp đặc trưng và thuật toán.}{1.0}
+\safeinput{best_models}
+
+\subsection{Nhận xét tổng hợp (sinh tự động từ số liệu)}
+\IfFileExists{tables/findings.tex}{\input{tables/findings.tex}}{\todo{Chạy python -m src.make\_latex để sinh phần này}}
+
+\todo{Viết diễn giải của bạn: vì sao đặc trưng/thuật toán nào tốt hơn (ví dụ TF-IDF với bigram nắm bắt cụm phủ định, embedding đa ngôn ngữ không đặc thù cho miền giáo dục, KNN kém với dữ liệu thưa nhiều chiều...). Chỉ nêu những điều được số liệu ở các bảng trên ủng hộ.}
+
+\subsection{Phân tích theo từng lớp và ma trận nhầm lẫn}
+Bảng~\ref{tab:perclass-sentiment}, \ref{tab:perclass-topic} và Hình~\ref{fig:cm-sent}, \ref{fig:cm-topic} cho thấy chất lượng của mô hình được chọn trên từng lớp.
+
+\safeinput{per_class_sentiment}
+\safefigure{confusion_matrix_sentiment.png}{fig:cm-sent}{Ma trận nhầm lẫn của mô hình cảm xúc tốt nhất (tập kiểm thử).}{1.0}
+\safeinput{per_class_topic}
+\safefigure{confusion_matrix_topic.png}{fig:cm-topic}{Ma trận nhầm lẫn của mô hình chủ đề tốt nhất (tập kiểm thử).}{1.0}
+
+\subsection{Phân tích lỗi}
+Các câu bị dự đoán sai được lưu trong \texttt{results/\allowbreak errors\_\allowbreak sentiment.csv} và \texttt{results/\allowbreak errors\_\allowbreak topic.csv}, sắp xếp theo độ tin cậy giảm dần.
+\todo{Chọn 5--10 ví dụ lỗi tiêu biểu (đặc biệt các lỗi có độ tin cậy cao), nhóm theo nguyên nhân: câu có cả khen lẫn chê, mỉa mai, nhãn nhập nhằng, câu quá ngắn, từ ngoài từ vựng... và đề xuất cách khắc phục.}
+
+\subsection{Thí nghiệm đối chứng}
+Để đánh giá ảnh hưởng của hai quyết định thiết kế, chúng tôi lặp lại thí nghiệm với đặc trưng TF-IDF, Logistic Regression và Linear SVM:
+(i) có hoặc không tách từ; (ii) có hoặc không dùng trọng số lớp \texttt{balanced} (Bảng~\ref{tab:ablation}).
+
+\safeinput{ablation}
+\todo{Nhận xét kết quả Bảng~\ref{tab:ablation}: tách từ và trọng số lớp có cải thiện F1-macro không, ở bài toán nào?}
+
+% ============================================================================
+\section{Ứng dụng demo}
+Mô hình tốt nhất của mỗi bài toán được lưu bằng \texttt{joblib} trong thư mục \texttt{models/} và được nạp bởi ứng dụng Streamlit (\texttt{app.py}).
+Người dùng nhập một câu phản hồi; hệ thống áp dụng đúng quy trình tiền xử lý đã dùng khi huấn luyện, rồi hiển thị nhãn cảm xúc và chủ đề cùng xác suất
+của từng lớp, với màu sắc tương ứng (xanh lục: tích cực, đỏ: tiêu cực, vàng: trung tính). Với Linear SVM, điểm hiển thị là softmax của khoảng cách đến siêu phẳng
+và chỉ mang tính tương đối, không phải xác suất đã hiệu chỉnh.
+
+\IfFileExists{figures/app_screenshot.png}{%
+  \begin{figure}[htbp]\centering\includegraphics[width=0.85\linewidth]{figures/app_screenshot.png}
+  \caption{Giao diện ứng dụng demo.}\label{fig:app}\end{figure}}{%
+  \todo{Chụp màn hình ứng dụng đang chạy, lưu thành report/figures/app\_screenshot.png để hình tự xuất hiện ở đây.}}
+
+% ============================================================================
+\section{Kết luận và hướng phát triển}
+\todo{Tóm tắt kết quả chính bằng lời của bạn (dựa trên Bảng~\ref{tab:best}), nêu hạn chế (ví dụ chỉ dùng mô hình cổ điển, câu trùng giữa các tập, mất cân bằng lớp).}
+
+Hướng phát triển: (i) tinh chỉnh (fine-tune) mô hình tiền huấn luyện cho tiếng Việt như PhoBERT \cite{nguyen2020phobert};
+(ii) huấn luyện đa nhiệm cho đồng thời cảm xúc và chủ đề; (iii) áp dụng các kỹ thuật xử lý mất cân bằng lớp (tăng cường dữ liệu, hàm mất mát có trọng số);
+(iv) hiệu chỉnh xác suất đầu ra của mô hình để hiển thị độ tin cậy đáng tin hơn trong ứng dụng.
+
+% ============================================================================
+\begin{thebibliography}{99}
+\bibitem{nguyen2018uitvsfc} K.~V. Nguyen, V.~D. Nguyen, P.~X.~V. Nguyen, T.~T.~H. Truong, N.~L.-T. Nguyen.
+  UIT-VSFC: Vietnamese Students' Feedback Corpus for Sentiment Analysis.
+  \emph{2018 10th International Conference on Knowledge and Systems Engineering (KSE)}, pp.~19--24, 2018.
+\bibitem{pedregosa2011sklearn} F.~Pedregosa et al. Scikit-learn: Machine Learning in Python.
+  \emph{Journal of Machine Learning Research}, 12:2825--2830, 2011.
+\bibitem{reimers2019sbert} N.~Reimers, I.~Gurevych. Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks.
+  \emph{Proceedings of EMNLP-IJCNLP}, pp.~3982--3992, 2019.
+\bibitem{reimers2020multilingual} N.~Reimers, I.~Gurevych. Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation.
+  \emph{Proceedings of EMNLP}, pp.~4512--4525, 2020.
+\bibitem{breiman2001rf} L.~Breiman. Random Forests. \emph{Machine Learning}, 45(1):5--32, 2001.
+\bibitem{cortes1995svm} C.~Cortes, V.~Vapnik. Support-vector networks. \emph{Machine Learning}, 20(3):273--297, 1995.
+\bibitem{fan2008liblinear} R.-E.~Fan, K.-W.~Chang, C.-J.~Hsieh, X.-R.~Wang, C.-J.~Lin. LIBLINEAR: A Library for Large Linear Classification.
+  \emph{Journal of Machine Learning Research}, 9:1871--1874, 2008.
+\bibitem{manning2008ir} C.~D. Manning, P.~Raghavan, H.~Schütze. \emph{Introduction to Information Retrieval}. Cambridge University Press, 2008.
+\bibitem{nguyen2020phobert} D.~Q. Nguyen, A.~T. Nguyen. PhoBERT: Pre-trained language models for Vietnamese.
+  \emph{Findings of EMNLP}, pp.~1037--1042, 2020.
+\bibitem{pyvi} V.~T. Tran. PyVi: Vietnamese text processing toolkit. \url{https://github.com/trungtv/pyvi}.
+\end{thebibliography}
+
+\end{document}

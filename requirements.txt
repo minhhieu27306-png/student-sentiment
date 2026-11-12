@@ -1,0 +1,31 @@
+# ============================================================
+# Student Sentiment Classification (UIT-VSFC) - thư viện cần thiết
+# Cài đặt:  pip install -r requirements.txt
+# Khuyến nghị Python 3.10 - 3.12
+# ============================================================
+
+# --- Xử lý dữ liệu & học máy ---
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+joblib>=1.3
+pyarrow>=14.0          # đọc/ghi file .parquet
+tqdm>=4.65
+
+# --- Trực quan hóa ---
+matplotlib>=3.7
+seaborn>=0.12
+
+# --- NLP tiếng Việt ---
+pyvi>=0.1.1            # tách từ tiếng Việt (mặc định)
+# underthesea>=6.8     # (tùy chọn) bộ tách từ thay thế: bỏ dấu # rồi dùng --tokenizer underthesea
+
+# --- Dữ liệu & Sentence Embeddings ---
+datasets>=2.14         # tải bộ dữ liệu từ Hugging Face
+sentence-transformers>=2.7   # đặc trưng Sentence Embeddings (kéo theo PyTorch, khá nặng)
+
+# --- Giao diện demo ---
+streamlit>=1.50
+
+# --- Notebook trong VS Code ---
+ipykernel>=6.25

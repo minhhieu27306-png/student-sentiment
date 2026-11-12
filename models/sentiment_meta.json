@@ -1,0 +1,26 @@
+{
+  "task": "sentiment",
+  "feature": "bow",
+  "model": "LinearSVM",
+  "params": {
+    "C": 0.1
+  },
+  "class_weight": "balanced",
+  "text_col": "text_seg",
+  "tokenizer": "pyvi",
+  "embedding_model": null,
+  "label_names": [
+    "negative",
+    "neutral",
+    "positive"
+  ],
+  "label_vi": [
+    "Tiêu cực",
+    "Trung tính",
+    "Tích cực"
+  ],
+  "val_f1_macro": 0.7850444779429524,
+  "test_accuracy": 0.8900821225521163,
+  "test_f1_macro": 0.7571258844463559,
+  "test_f1_weighted": 0.8910087068199133
+}

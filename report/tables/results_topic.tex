@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Kết quả trên tập kiểm thử cho bài toán chủ đề (\%). In đậm: giá trị cao nhất mỗi cột. P/R/F1-macro: trung bình không trọng số các lớp; F1-w: trung bình có trọng số.}
+\label{tab:results-topic}
+\fitbox{\begin{tabular}{llrrrrr}
+\toprule
+Đặc trưng & Mô hình & Acc & P-macro & R-macro & F1-macro & F1-w \\
+\midrule
+BoW & Naive Bayes & 82.06 & 67.46 & 70.97 & 69.06 & 82.29 \\
+ & Logistic Regression & 81.65 & 69.83 & \textbf{78.16} & 72.51 & 83.14 \\
+ & Linear SVM & 84.59 & 73.29 & 77.63 & 74.93 & 85.30 \\
+ & Random Forest & \textbf{85.79} & 76.48 & 70.72 & 73.31 & 85.25 \\
+ & KNN & 82.94 & 73.11 & 62.68 & 66.61 & 81.68 \\
+\midrule
+TF-IDF & Naive Bayes & 84.14 & 74.57 & 66.57 & 68.42 & 83.00 \\
+ & Logistic Regression & 83.39 & 71.62 & 77.19 & 73.95 & 84.21 \\
+ & Linear SVM & 85.69 & 74.64 & 76.20 & \textbf{75.33} & \textbf{85.86} \\
+ & Random Forest & 81.74 & 69.12 & 77.01 & 72.18 & 82.90 \\
+ & KNN & 82.91 & \textbf{76.76} & 62.97 & 67.35 & 81.18 \\
+\bottomrule
+\end{tabular}}
+\end{table}

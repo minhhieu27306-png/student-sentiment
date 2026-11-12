@@ -1,0 +1,37 @@
+# --- Môi trường ảo ---
+.venv/
+venv/
+env/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Dữ liệu (tải lại bằng `python -m src.data_loader`; không đẩy lên GitHub) ---
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# --- Mô hình: mặc định GIỮ models/*.pkl (nhỏ) để app chạy ngay sau khi clone.
+# Nếu mô hình > 50 MB (ví dụ Random Forest), bỏ comment dòng dưới để không đẩy lên GitHub:
+# models/*.pkl
+
+# --- Tệp tạm của LaTeX ---
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.bbl
+report/*.blg
+
+# --- Hệ điều hành / IDE ---
+.DS_Store
+Thumbs.db
+.idea/
